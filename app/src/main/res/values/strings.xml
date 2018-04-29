@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">MusicRouter</string>
+    <string name="action_settings">Settings</string>
+    <string name="section_format">Hello World from section: %1$d</string>
+
+    <string name="builtin_speaker">Builtin Speaker</string>
+    <string name="wired_headset">Wired Headset</string>
+    <string name="wired_headphones">Wired Headphones</string>
+    <string name="aux_line">Aux Line</string>
+    <string name="bluetooth_a2dp">Bluetooth A2DP</string>
+    <string name="builtin_earpiece">Builtin Earpiece</string>
+    <string name="hdmi">HDMI</string>
+    <string name="usb_accessory">USB Accessory</string>
+    <string name="usb_device">USB Device</string>
+    <string name="usb_headset">USB Headset</string>
+</resources>

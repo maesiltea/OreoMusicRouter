@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/constraintLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".RoutingActivity$PlaceholderFragment">
+
+    <LinearLayout
+        android:id="@+id/linear_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <Switch
+            android:id="@+id/switch_speaker"
+            style="?android:attr/switchStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:enabled="false"
+            android:padding="10dp"
+            android:text="@string/builtin_speaker" />
+
+        <Switch
+            android:id="@+id/switch_earpiece"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:enabled="false"
+            android:padding="10dp"
+            android:text="@string/builtin_earpiece" />
+
+        <Switch
+            android:id="@+id/switch_wired_headset"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:enabled="false"
+            android:padding="10dp"
+            android:text="@string/wired_headset" />
+
+        <Switch
+            android:id="@+id/switch_wired_headphones"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:enabled="false"
+            android:padding="10dp"
+            android:text="@string/wired_headphones" />
+
+        <Switch
+            android:id="@+id/switch_bluetooth_a2dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:enabled="false"
+            android:padding="10dp"
+            android:text="@string/bluetooth_a2dp" />
+
+        <Switch
+            android:id="@+id/switch_hdmi"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:enabled="false"
+            android:padding="10dp"
+            android:text="@string/hdmi" />
+
+        <Switch
+            android:id="@+id/switch_usb_accessory"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:enabled="false"
+            android:padding="10dp"
+            android:text="@string/usb_accessory" />
+
+        <Switch
+            android:id="@+id/switch_usb_device"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:enabled="false"
+            android:padding="10dp"
+            android:text="@string/usb_device" />
+
+        <Switch
+            android:id="@+id/switch_usb_headset"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:enabled="false"
+            android:padding="10dp"
+            android:text="@string/usb_headset" />
+
+        <Switch
+            android:id="@+id/switch_aux_line"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:enabled="false"
+            android:padding="10dp"
+            android:text="@string/aux_line" />
+    </LinearLayout>
+</android.support.constraint.ConstraintLayout>
