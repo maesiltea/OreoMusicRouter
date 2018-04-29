@@ -1,7 +1,5 @@
 package org.iptime.maesiltea.musicrouter;
 
-import android.app.ActionBar;
-import android.app.Service;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -9,10 +7,8 @@ import android.content.ServiceConnection;
 import android.media.AudioDeviceInfo;
 import android.media.AudioManager;
 import android.os.IBinder;
-import android.provider.MediaStore;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 
@@ -28,15 +24,10 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
-import android.widget.BaseAdapter;
 import android.widget.CompoundButton;
-import android.widget.LinearLayout;
 import android.widget.Switch;
-import android.widget.TextView;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
 public class RoutingActivity extends AppCompatActivity {
 
@@ -50,12 +41,14 @@ public class RoutingActivity extends AppCompatActivity {
      */
     private SectionsPagerAdapter mSectionsPagerAdapter;
     private final String TAG = "RoutingActivity";
+    private final boolean DEBUG = false;
 
     /**
      * The {@link ViewPager} that will host the section contents.
      */
     private ViewPager mViewPager;
     private PlaceholderFragment mRoutingPage;
+    private Context mContext;
     private final int PAGE_ROUTING = 0;
     private final int PAGE_SETTINGS = 1;
 
@@ -70,13 +63,15 @@ public class RoutingActivity extends AppCompatActivity {
      */
     private MusicRouterService mService;
     private MusicRouterService getService() { return mService; }
+    private Context getContext() { return mContext; }
     private boolean mBound;
     private boolean getBound() { return mBound; }
+    private void setBound(boolean bound) { mBound = bound; }
     private ServiceConnection getConnection() { return mConnection; }
     private ServiceConnection mConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
-            Log.d(TAG, "onServiceConnected()");
+            if(DEBUG) Log.d(TAG, "onServiceConnected()");
             MusicRouterService.LocalBinder binder = (MusicRouterService.LocalBinder) service;
             mService = binder.getService();
             mBound = true;
@@ -87,20 +82,29 @@ public class RoutingActivity extends AppCompatActivity {
             mMusicRouterDeviceCallback = new MusicRouterDeviceCallback() {
                 @Override
                 public void onDeviceAdded(AudioDeviceInfo[] addedDevices) {
-                    Log.v(TAG, "onDeviceAdded()");
-                    for(AudioDeviceInfo device : addedDevices) {
-                        if(device.isSink()) {
-                            mRoutingPage.setSwitchEnabled(device.getType(),true);
+                    if(DEBUG) Log.v(TAG, "onDeviceAdded()");
+                    for(AudioDeviceInfo info : addedDevices) {
+                        if(info.isSink()) {
+                            mRoutingPage.setSwitchEnabled(info.getType(), true);
                         }
+                    }
+                    AudioDeviceInfo device = mService.getRoutedDevice();
+                    if(device != null) {
+                        mRoutingPage.setSwitchChecked(device.getType(), true, false);
                     }
                 }
 
                 @Override
                 public void onDeviceDeleted(AudioDeviceInfo[] removedDevices) {
-                    for(AudioDeviceInfo device : removedDevices) {
-                        if(device.isSink()) {
-                            mRoutingPage.setSwitchEnabled(device.getType(),false);
+                    if(DEBUG) Log.d(TAG, "onDeviceDeleted()");
+                    for(AudioDeviceInfo info : removedDevices) {
+                        if(info.isSink()) {
+                            mRoutingPage.setSwitchEnabled(info.getType(), false);
                         }
+                    }
+                    AudioDeviceInfo device = mService.getRoutedDevice();
+                    if(device != null) {
+                        mRoutingPage.setSwitchChecked(device.getType(), true, false);
                     }
                 }
 
@@ -110,10 +114,22 @@ public class RoutingActivity extends AppCompatActivity {
                     switch(status) {
                         case MusicRouterDeviceCallback.STATE_PLAY:
                             mPlaybackState = MusicRouterDeviceCallback.STATE_PLAY;
+                            AudioDeviceInfo device = mService.getRoutedDevice();
+                            if(device != null) {
+                                mRoutingPage.setSwitchChecked(device.getType(), true, false);
+                            }
                             break;
                         case MusicRouterDeviceCallback.STATE_STOP:
                             mPlaybackState = MusicRouterDeviceCallback.STATE_STOP;
                             break;
+                    }
+                }
+
+                @Override
+                public void onFirstRoutingDevice(AudioDeviceInfo deviceInfo) {
+                    if(DEBUG) Log.d(TAG, "onFirstRoutingDevice()");
+                    if(mRoutingPage != null) {
+                        mRoutingPage.setSwitchEnabled(deviceInfo.getType(), true);
                     }
                 }
             };
@@ -158,16 +174,15 @@ public class RoutingActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.w(TAG, "onCreate() mBound " + mBound);
+        if(DEBUG) Log.w(TAG, "onCreate() mBound " + mBound);
         setContentView(R.layout.activity_routing);
+        mContext = this;
 
-        // bind to MusicRouterService (local service)
-        if(mBound == false) {
-            Log.d(TAG, "onCreate() start Service...");
+        if (!mBound) {
+            if (DEBUG) Log.d(TAG, "onCreate() start Service...");
             Intent intent = new Intent(this, MusicRouterService.class);
-            bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
             startService(intent);
-            Log.d(TAG, "onCreate() start Service is done");
+            bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
         }
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -225,6 +240,8 @@ public class RoutingActivity extends AppCompatActivity {
          */
         private static final String ARG_SECTION_NUMBER = "section_number";
         private static final String TAG = "PlaceholderFragment";
+        private final boolean DEBUG = false;
+        private Switch mServiceSwitch;
 
         /**
          *  Audio related implementations
@@ -232,6 +249,7 @@ public class RoutingActivity extends AppCompatActivity {
         private AudioManager mManager;
         private HashMap<Integer, Switch> mSwitches;
         private boolean mDisableState;
+        private boolean mWithoutRoutingChangeFlag;
 
         public PlaceholderFragment() {
         }
@@ -251,31 +269,44 @@ public class RoutingActivity extends AppCompatActivity {
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
-            Log.w(TAG, "onCreateView");
+            if(DEBUG) Log.v(TAG, "onCreateView Section " + getArguments().getInt(ARG_SECTION_NUMBER));
             View rootView = null;
 
             switch(getArguments().getInt(ARG_SECTION_NUMBER)) {
                 case 1:
                     rootView = inflater.inflate(R.layout.fragment_routing, container, false);
                     if(getActivity() != null) ((RoutingActivity) getActivity()).setRoutingPage(this);
+                    mManager = (AudioManager) getContext().getSystemService(Context.AUDIO_SERVICE);
+                    mSwitches = null;
+                    mDisableState = false;
+                    mWithoutRoutingChangeFlag = false;
+                    mServiceSwitch = null;
+                    initializeDeviceList(rootView);
+                    initializeServiceSwitch(rootView);
                     break;
                 case 2:
                     rootView = inflater.inflate(R.layout.music_router_settings, container, false);
                     break;
             }
 
-            mManager = (AudioManager) getContext().getSystemService(Context.AUDIO_SERVICE);
-            mSwitches = null;
-            mDisableState = false;
-            Log.d(TAG, "onCreateView() arg " + getArguments().getInt(ARG_SECTION_NUMBER));
-
-            // update device list
-            if(getArguments().getInt(ARG_SECTION_NUMBER) == 1) {
-                Log.d(TAG, "First Page");
-                initializeDeviceList(rootView);
-            }
-
             return rootView;
+        }
+
+        private void initializeServiceSwitch(View v) {
+            mServiceSwitch = (Switch) v.findViewById(R.id.switch_service);
+            mServiceSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                    Log.d(TAG, "onCheckedChanged()");
+                    RoutingActivity ra = (RoutingActivity) getActivity();
+                    MusicRouterService service = ra.getService();
+                    if(isChecked) {
+                        service.setBackgroundPlayback(true);
+                    } else {
+                        service.setBackgroundPlayback(false);
+                    }
+                }
+            });
         }
 
         private void uncheckOtherSwitches(Switch s) {
@@ -296,11 +327,13 @@ public class RoutingActivity extends AppCompatActivity {
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                     // AUX_LINE
                     RoutingActivity a = (RoutingActivity) getActivity();
-                    if(isChecked && a != null && a.getService() != null) {
-                        a.getService().setPreferredDevice(AudioDeviceInfo.TYPE_AUX_LINE);
-                        uncheckOtherSwitches((Switch) buttonView);
-                    } else if(mDisableState == false && a != null && a.getService() != null) {
-                        a.getService().setPreferredDevice(-1);
+                    if(mWithoutRoutingChangeFlag == false) {
+                        if (isChecked && a != null && a.getService() != null) {
+                            a.getService().setPreferredDevice(AudioDeviceInfo.TYPE_AUX_LINE);
+                            uncheckOtherSwitches((Switch) buttonView);
+                        } else if (mDisableState == false && a != null && a.getService() != null) {
+                            a.getService().setPreferredDevice(-1);
+                        }
                     }
                 }
             });
@@ -311,11 +344,13 @@ public class RoutingActivity extends AppCompatActivity {
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                     // Bluetooth A2DP
                     RoutingActivity a = (RoutingActivity) getActivity();
-                    if(isChecked && a != null && a.getService() != null) {
-                        a.getService().setPreferredDevice(AudioDeviceInfo.TYPE_BLUETOOTH_A2DP);
-                        uncheckOtherSwitches((Switch) buttonView);
-                    } else if(mDisableState == false && a != null && a.getService() != null) {
-                        a.getService().setPreferredDevice(-1);
+                    if(mWithoutRoutingChangeFlag == false) {
+                        if (isChecked && a != null && a.getService() != null) {
+                            a.getService().setPreferredDevice(AudioDeviceInfo.TYPE_BLUETOOTH_A2DP);
+                            uncheckOtherSwitches((Switch) buttonView);
+                        } else if (mDisableState == false && a != null && a.getService() != null) {
+                            a.getService().setPreferredDevice(-1);
+                        }
                     }
                 }
             });
@@ -326,11 +361,13 @@ public class RoutingActivity extends AppCompatActivity {
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                     // Builtin earpiece
                     RoutingActivity a = (RoutingActivity) getActivity();
-                    if(isChecked && a != null && a.getService() != null) {
-                        a.getService().setPreferredDevice(AudioDeviceInfo.TYPE_BUILTIN_EARPIECE);
-                        uncheckOtherSwitches((Switch) buttonView);
-                    } else if(mDisableState == false && a != null && a.getService() != null) {
-                        a.getService().setPreferredDevice(-1);
+                    if(mWithoutRoutingChangeFlag == false) {
+                        if (isChecked && a != null && a.getService() != null) {
+                            a.getService().setPreferredDevice(AudioDeviceInfo.TYPE_BUILTIN_EARPIECE);
+                            uncheckOtherSwitches((Switch) buttonView);
+                        } else if (mDisableState == false && a != null && a.getService() != null) {
+                            a.getService().setPreferredDevice(-1);
+                        }
                     }
                 }
             });
@@ -341,11 +378,13 @@ public class RoutingActivity extends AppCompatActivity {
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                     // Builtin earpiece
                     RoutingActivity a = (RoutingActivity) getActivity();
-                    if(isChecked && a != null && a.getService() != null) {
-                        a.getService().setPreferredDevice(AudioDeviceInfo.TYPE_BUILTIN_SPEAKER);
-                        uncheckOtherSwitches((Switch) buttonView);
-                    } else if(mDisableState == false && a != null && a.getService() != null) {
-                        a.getService().setPreferredDevice(-1);
+                    if(mWithoutRoutingChangeFlag == false) {
+                        if (isChecked && a != null && a.getService() != null) {
+                            a.getService().setPreferredDevice(AudioDeviceInfo.TYPE_BUILTIN_SPEAKER);
+                            uncheckOtherSwitches((Switch) buttonView);
+                        } else if (mDisableState == false && a != null && a.getService() != null) {
+                            a.getService().setPreferredDevice(-1);
+                        }
                     }
                 }
             });
@@ -356,11 +395,13 @@ public class RoutingActivity extends AppCompatActivity {
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                     // HDMI
                     RoutingActivity a = (RoutingActivity) getActivity();
-                    if(isChecked && a != null && a.getService() != null) {
-                        a.getService().setPreferredDevice(AudioDeviceInfo.TYPE_HDMI);
-                        uncheckOtherSwitches((Switch) buttonView);
-                    } else if(mDisableState == false && a != null && a.getService() != null) {
-                        a.getService().setPreferredDevice(-1);
+                    if(mWithoutRoutingChangeFlag == false) {
+                        if (isChecked && a != null && a.getService() != null) {
+                            a.getService().setPreferredDevice(AudioDeviceInfo.TYPE_HDMI);
+                            uncheckOtherSwitches((Switch) buttonView);
+                        } else if (mDisableState == false && a != null && a.getService() != null) {
+                            a.getService().setPreferredDevice(-1);
+                        }
                     }
                 }
             });
@@ -371,11 +412,13 @@ public class RoutingActivity extends AppCompatActivity {
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                     // USB Accessory
                     RoutingActivity a = (RoutingActivity) getActivity();
-                    if(isChecked && a != null && a.getService() != null) {
-                        a.getService().setPreferredDevice(AudioDeviceInfo.TYPE_USB_ACCESSORY);
-                        uncheckOtherSwitches((Switch) buttonView);
-                    } else if(mDisableState == false && a != null && a.getService() != null) {
-                        a.getService().setPreferredDevice(-1);
+                    if(mWithoutRoutingChangeFlag == false) {
+                        if (isChecked && a != null && a.getService() != null) {
+                            a.getService().setPreferredDevice(AudioDeviceInfo.TYPE_USB_ACCESSORY);
+                            uncheckOtherSwitches((Switch) buttonView);
+                        } else if (mDisableState == false && a != null && a.getService() != null) {
+                            a.getService().setPreferredDevice(-1);
+                        }
                     }
                 }
             });
@@ -386,11 +429,13 @@ public class RoutingActivity extends AppCompatActivity {
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                     // USB Device
                     RoutingActivity a = (RoutingActivity) getActivity();
-                    if(isChecked && a != null && a.getService() != null) {
-                        a.getService().setPreferredDevice(AudioDeviceInfo.TYPE_USB_DEVICE);
-                        uncheckOtherSwitches((Switch) buttonView);
-                    } else if(mDisableState == false && a != null && a.getService() != null) {
-                        a.getService().setPreferredDevice(-1);
+                    if(mWithoutRoutingChangeFlag == false) {
+                        if (isChecked && a != null && a.getService() != null) {
+                            a.getService().setPreferredDevice(AudioDeviceInfo.TYPE_USB_DEVICE);
+                            uncheckOtherSwitches((Switch) buttonView);
+                        } else if (mDisableState == false && a != null && a.getService() != null) {
+                            a.getService().setPreferredDevice(-1);
+                        }
                     }
                 }
             });
@@ -401,11 +446,13 @@ public class RoutingActivity extends AppCompatActivity {
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                     // USB Headset
                     RoutingActivity a = (RoutingActivity) getActivity();
-                    if(isChecked && a != null && a.getService() != null) {
-                        a.getService().setPreferredDevice(AudioDeviceInfo.TYPE_USB_HEADSET);
-                        uncheckOtherSwitches((Switch) buttonView);
-                    } else if(mDisableState == false && a != null && a.getService() != null) {
-                        a.getService().setPreferredDevice(-1);
+                    if(mWithoutRoutingChangeFlag == false) {
+                        if (isChecked && a != null && a.getService() != null) {
+                            a.getService().setPreferredDevice(AudioDeviceInfo.TYPE_USB_HEADSET);
+                            uncheckOtherSwitches((Switch) buttonView);
+                        } else if (mDisableState == false && a != null && a.getService() != null) {
+                            a.getService().setPreferredDevice(-1);
+                        }
                     }
                 }
             });
@@ -416,11 +463,13 @@ public class RoutingActivity extends AppCompatActivity {
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                     // Wired Headphones
                     RoutingActivity a = (RoutingActivity) getActivity();
-                    if(isChecked && a != null && a.getService() != null) {
-                        a.getService().setPreferredDevice(AudioDeviceInfo.TYPE_WIRED_HEADPHONES);
-                        uncheckOtherSwitches((Switch) buttonView);
-                    } else if(mDisableState == false && a != null && a.getService() != null) {
-                        a.getService().setPreferredDevice(-1);
+                    if(mWithoutRoutingChangeFlag == false) {
+                        if (isChecked && a != null && a.getService() != null) {
+                            a.getService().setPreferredDevice(AudioDeviceInfo.TYPE_WIRED_HEADPHONES);
+                            uncheckOtherSwitches((Switch) buttonView);
+                        } else if (mDisableState == false && a != null && a.getService() != null) {
+                            a.getService().setPreferredDevice(-1);
+                        }
                     }
                 }
             });
@@ -431,16 +480,22 @@ public class RoutingActivity extends AppCompatActivity {
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                     // Wired Headset
                     RoutingActivity a = (RoutingActivity) getActivity();
-                    if(isChecked && a != null && a.getService() != null) {
-                        a.getService().setPreferredDevice(AudioDeviceInfo.TYPE_WIRED_HEADSET);
-                        uncheckOtherSwitches((Switch) buttonView);
-                    } else if(mDisableState == false && a != null && a.getService() != null) {
-                        a.getService().setPreferredDevice(-1);
+                    if(mWithoutRoutingChangeFlag == false) {
+                        if (isChecked && a != null && a.getService() != null) {
+                            a.getService().setPreferredDevice(AudioDeviceInfo.TYPE_WIRED_HEADSET);
+                            uncheckOtherSwitches((Switch) buttonView);
+                        } else if (mDisableState == false && a != null && a.getService() != null) {
+                            a.getService().setPreferredDevice(-1);
+                        }
                     }
                 }
             });
             mSwitches.put(AudioDeviceInfo.TYPE_WIRED_HEADSET, s);
 
+            updateSwitchEnabledState();
+        }
+
+        public void updateSwitchEnabledState() {
             AudioDeviceInfo[] devices = mManager.getDevices(AudioManager.GET_DEVICES_OUTPUTS);
             for(AudioDeviceInfo device : devices) {
                 if(mSwitches.containsKey(device.getType())) {
@@ -451,10 +506,22 @@ public class RoutingActivity extends AppCompatActivity {
 
         public void setSwitchEnabled(int key, boolean enabled) {
             if(mSwitches != null) {
-                Log.v(TAG, "setSwitchEnabled() enable key " + key);
                 mSwitches.get(key).setEnabled(enabled);
             } else {
-                Log.v(TAG, "setSwitchEnabled() mSwitches is null");
+                Log.w(TAG, "setSwitchEnabled() mSwitches is null");
+            }
+        }
+
+        public void setSwitchChecked(int key, boolean checked, boolean withoutRoutingChange) {
+            if(mSwitches != null) {
+                Switch sw = mSwitches.get(key);
+                if(sw != null) {
+                    if(withoutRoutingChange) mWithoutRoutingChangeFlag = true;
+                    sw.setChecked(checked);
+                    if(withoutRoutingChange) mWithoutRoutingChangeFlag = false;
+                }
+            } else {
+                Log.w(TAG, "setSwitchChecked() mSwitches is null");
             }
         }
     }
