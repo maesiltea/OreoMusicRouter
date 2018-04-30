@@ -6,6 +6,9 @@
     <string name="title_service">Service</string>
     <string name="title_devices">Devices</string>
 
+    <string name="msg_initialize_routing">Initialize routing device...</string>
+    <string name="msg_selected_device">Selected Device: </string>
+
     <string name="switch_service">Service On / Off</string>
 
     <string name="builtin_speaker">Builtin Speaker</string>
@@ -13,9 +16,15 @@
     <string name="wired_headphones">Wired Headphones</string>
     <string name="aux_line">Aux Line</string>
     <string name="bluetooth_a2dp">Bluetooth A2DP</string>
+    <string name="bluetooth_sco">Bluetooth SCO</string>
     <string name="builtin_earpiece">Builtin Earpiece</string>
     <string name="hdmi">HDMI</string>
+    <string name="dock">Dock</string>
+    <string name="hdmi_arc">HDMI ARC</string>
     <string name="usb_accessory">USB Accessory</string>
     <string name="usb_device">USB Device</string>
     <string name="usb_headset">USB Headset</string>
+    <string name="type_unknown">Unknwon Device</string>
+    <string name="line_analog">Line Analog</string>
+    <string name="line_digital">Line Digital</string>
 </resources>

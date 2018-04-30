@@ -121,9 +121,10 @@ public class MusicRouterService extends Service {
         // check whether the routing is initialized.
         if(mRoutingDevice != null) {
             if(DEBUG) Log.v(TAG, "playMutedMusic() change routing to " + mRoutingDevice.getType());
-            mTrack.setPreferredDevice(null);
-            sleep(50);
-            mTrack.setPreferredDevice(mRoutingDevice);
+            Message msg = new Message();
+            msg.arg1 = MSG_SET_PREFERRED_DEVICE;
+            msg.arg2 = mRoutingDevice.getType();
+            mHandler.sendMessageDelayed(msg, 10);
         }
     }
 
@@ -147,6 +148,7 @@ public class MusicRouterService extends Service {
     // Command list of ServiceHandler
     private final int MSG_PLAY_MUSIC = 0;
     private final int MSG_STOP_MUSIC = 1;
+    private final int MSG_SET_PREFERRED_DEVICE = 2;
 
     // Handler that receives messages from the thread
     private final class ServiceHandler extends Handler {
@@ -161,7 +163,10 @@ public class MusicRouterService extends Service {
                     if(mBackgroundPlayback) playMutedMusic();
                     break;
                 case MSG_STOP_MUSIC:
-                    if(mBackgroundPlayback) stopMutedMusic();
+                    stopMutedMusic();
+                    break;
+                case MSG_SET_PREFERRED_DEVICE:
+                    setPreferredDevice(msg.arg2);
                     break;
                 default:
                     Log.e(TAG, "Wrong message!");
@@ -197,14 +202,23 @@ public class MusicRouterService extends Service {
     }
 
     public void setPreferredDevice(int type) {
+        if(DEBUG) Log.v(TAG, "setPreferredDevice() " + MusicRouterDevice.getDeviceNameByType(this, type));
         if(mOutputDevices.get(type) != null) {
             mTrack.setPreferredDevice(mOutputDevices.get(type));
-            Toast.makeText(this, type + "으로 설정되었습니다.", Toast.LENGTH_SHORT).show();
+            AudioDeviceInfo info = mTrack.getRoutedDevice();
+            if(info == null || info.getType() != type) {
+                Toast.makeText(this, this.getString(R.string.msg_selected_device) + MusicRouterDevice.getDeviceNameByType(this, type), Toast.LENGTH_SHORT).show();
+            }
             mRoutingDevice = mOutputDevices.get(type);
+            setPreferencesInt("routing_device_type", type);
         } else {
+            AudioDeviceInfo info = mTrack.getPreferredDevice();
+            if(info != null) {
+                Toast.makeText(this, this.getString(R.string.msg_initialize_routing), Toast.LENGTH_SHORT).show();
+            }
             mTrack.setPreferredDevice(null);
-            Toast.makeText(this, "라우팅을 초기화 합니다.", Toast.LENGTH_SHORT).show();
             mRoutingDevice = null;
+            setPreferencesInt("routing_device_type", MusicRouterDevice.TYPE_NULL);
         }
     }
 
@@ -228,7 +242,19 @@ public class MusicRouterService extends Service {
         SharedPreferences pf = getSharedPreferences("routing_activity", MODE_PRIVATE);
         SharedPreferences.Editor ed = pf.edit();
         ed.putString(name, value);
-        ed.commit();
+        ed.apply();
+    }
+
+    public int getPreferencesInt(String name, int defVal) {
+        SharedPreferences pf = getSharedPreferences("routing_activity", MODE_PRIVATE);
+        return pf.getInt(name, defVal);
+    }
+
+    public void setPreferencesInt(String name, int value) {
+        SharedPreferences pf = getSharedPreferences("routing_activity", MODE_PRIVATE);
+        SharedPreferences.Editor ed = pf.edit();
+        ed.putInt(name, value);
+        ed.apply();
     }
 
     /**
@@ -238,7 +264,6 @@ public class MusicRouterService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         if(DEBUG) Log.v(TAG, "onStartCommand()");
-        Toast.makeText(this, "MusicRouterService starting as foreground!", Toast.LENGTH_SHORT).show();
 
         super.onStartCommand(intent, flags, startId);
         Notification notification = new Notification.Builder(this)
@@ -270,7 +295,8 @@ public class MusicRouterService extends Service {
         mHandler = new ServiceHandler(mLooper);
 
         // 2. initialize variables
-        mBackgroundPlayback = ("true".equals(getPreferences("background_playback", "false"))) ? true : false;
+        mBackgroundPlayback = "true".equals(getPreferences("background_playback", "false"));
+        Log.d(TAG, "onCreate() mBackgroundPlayback " + mBackgroundPlayback);
         mPlaybackState = false;
         mManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         mPlaybackCallback = new AudioManager.AudioPlaybackCallback() {
@@ -288,19 +314,16 @@ public class MusicRouterService extends Service {
                         configCount++;
                     }
                 }
+
                 // should consider mutedMusic state
                 if(mIsPlaying && configCount > 1) {
                     mPlaybackState = true;
-                } else if (!mIsPlaying && configCount > 0) {
-                    mPlaybackState = true;
-                } else {
-                    mPlaybackState = false;
-                }
-                Log.d(TAG, "onPlaybackConfigChanged() mPlaybackState " + mPlaybackState);
+                } else mPlaybackState = !mIsPlaying && configCount > 0;
+                if(DEBUG) Log.d(TAG, "onPlaybackConfigChanged() mPlaybackState " + mPlaybackState);
                 if(mMusicDeviceCallback != null) {
                     mMusicDeviceCallback.onMusicPlaybackStatusChanged(mPlaybackState
-                                                            ? MusicRouterDeviceCallback.STATE_PLAY
-                                                            : MusicRouterDeviceCallback.STATE_STOP);
+                                                            ? MusicRouterDevice.STATE_PLAY
+                                                            : MusicRouterDevice.STATE_STOP);
                 }
 
                 Message msg = new Message();
@@ -364,16 +387,16 @@ public class MusicRouterService extends Service {
         mRoutingChangedListener = new AudioRouting.OnRoutingChangedListener() {
             @Override
             public void onRoutingChanged(AudioRouting router) {
-                if(DEBUG) Log.v(TAG, "onRoutingChanged() ");
+                if(DEBUG) Log.v(TAG, "onRoutingChanged()");
                 AudioDeviceInfo device = router.getRoutedDevice();
+                Message msg = new Message();
+                msg.arg1 = MSG_SET_PREFERRED_DEVICE;
                 if(mRoutingDevice == null) {
-                    if(DEBUG) Log.d(TAG, "setPreferredDevice(null)");
-                    mTrack.setPreferredDevice(null);
+                    msg.arg2 = MusicRouterDevice.TYPE_NULL;
+                    mHandler.sendMessageDelayed(msg, 10);
                 } else if(mTrack.getRoutedDevice() == null || mTrack.getRoutedDevice().getType() != mRoutingDevice.getType()) {
-                    if(DEBUG) Log.d(TAG, "setPreferredDevice() " + mRoutingDevice.getType());
-                    mTrack.setPreferredDevice(null);
-                    sleep(50);  // for timing issue
-                    mTrack.setPreferredDevice(mRoutingDevice);
+                    msg.arg2 = mRoutingDevice.getType();
+                    mHandler.sendMessageDelayed(msg, 10);
                 }
             }
         };
