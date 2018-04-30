@@ -129,7 +129,7 @@ public class MusicRouterService extends Service {
     }
 
     private void stopMutedMusicThread() {
-        Log.d(TAG, "stopMutedMusicThread()");
+        if(DEBUG) Log.d(TAG, "stopMutedMusicThread()");
         mIsPlaying = false;
         mTrack.setPreferredDevice(null);
         mTrack.stop();
@@ -138,7 +138,7 @@ public class MusicRouterService extends Service {
     }
 
     private void stopMutedMusic() {
-        Log.d(TAG, "stopMutedMusic()");
+        if(DEBUG) Log.d(TAG, "stopMutedMusic()");
         mIsPlaying = false;
     }
 
@@ -186,7 +186,7 @@ public class MusicRouterService extends Service {
 
     @Override
     public IBinder onBind(Intent intent) {
-        Log.d(TAG, "onBind()");
+        if(DEBUG) Log.d(TAG, "onBind()");
         return mBinder;
     }
 
@@ -224,6 +224,10 @@ public class MusicRouterService extends Service {
 
     public AudioDeviceInfo getRoutedDevice() {
         return mTrack.getRoutedDevice();
+    }
+
+    public AudioDeviceInfo getPreferredDevice() {
+        return mTrack.getPreferredDevice();
     }
 
     public void setBackgroundPlayback(boolean enable) {
@@ -296,7 +300,6 @@ public class MusicRouterService extends Service {
 
         // 2. initialize variables
         mBackgroundPlayback = "true".equals(getPreferences("background_playback", "false"));
-        Log.d(TAG, "onCreate() mBackgroundPlayback " + mBackgroundPlayback);
         mPlaybackState = false;
         mManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         mPlaybackCallback = new AudioManager.AudioPlaybackCallback() {
@@ -310,7 +313,7 @@ public class MusicRouterService extends Service {
                             || attr.getContentType() == AudioAttributes.CONTENT_TYPE_MUSIC)
                             && (attr.getUsage() == AudioAttributes.USAGE_MEDIA
                             || attr.getUsage() == AudioAttributes.USAGE_GAME)) {
-                        Log.d(TAG, "Music is being played");
+                        if(DEBUG) Log.d(TAG, "Music is being played");
                         configCount++;
                     }
                 }
@@ -340,7 +343,7 @@ public class MusicRouterService extends Service {
             @Override
             public void onAudioDevicesAdded(AudioDeviceInfo[] addedDevices) {
                 super.onAudioDevicesAdded(addedDevices);
-                Log.d(TAG, "onAudioDevicesAdded()");
+                if(DEBUG) Log.d(TAG, "onAudioDevicesAdded()");
                 for(AudioDeviceInfo device: addedDevices) {
                     if(device.isSink()) {
                         mOutputDevices.put(device.getType(), device);
@@ -348,7 +351,6 @@ public class MusicRouterService extends Service {
                 }
                 // Notify to client(Activity)
                 if(mMusicDeviceCallback != null) {
-                    Log.d(TAG, "onAudioDevicesAdded() calls callback");
                     mMusicDeviceCallback.onDeviceAdded(addedDevices);
                 }
             }
@@ -356,7 +358,7 @@ public class MusicRouterService extends Service {
             @Override
             public void onAudioDevicesRemoved(AudioDeviceInfo[] removedDevices) {
                 super.onAudioDevicesRemoved(removedDevices);
-                Log.d(TAG, "onAudioDevicesRemoved()");
+                if(DEBUG) Log.d(TAG, "onAudioDevicesRemoved()");
                 for(AudioDeviceInfo device : removedDevices) {
                     if(device.isSink()) {
                         mOutputDevices.delete(device.getType());
@@ -364,7 +366,6 @@ public class MusicRouterService extends Service {
                 }
                 // Notify to client (Activity)
                 if(mMusicDeviceCallback != null) {
-                    Log.d(TAG, "onAudioDevicesRemoved() calls callback");
                     mMusicDeviceCallback.onDeviceDeleted(removedDevices);
                 }
             }

@@ -314,7 +314,7 @@ public class RoutingActivity extends AppCompatActivity {
             assert ra != null;
             MusicRouterService service = ra.getService();
             if(service != null) {
-                AudioDeviceInfo info = service.getRoutedDevice();
+                AudioDeviceInfo info = service.getPreferredDevice();
                 if(info != null) {
                     Switch sw = mSwitches.get(info.getType());
                     if(sw != null) sw.setChecked(true);
