@@ -11,7 +11,6 @@ import android.media.AudioDeviceInfo;
 import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioPlaybackConfiguration;
-import android.media.AudioRouting;
 import android.media.AudioTrack;
 import android.os.Binder;
 import android.os.Handler;
@@ -42,7 +41,6 @@ public class MusicRouterService extends Service {
     private AudioDeviceCallback mDeviceCallback;
     private SparseArray<AudioDeviceInfo> mOutputDevices;
     private MusicRouterDeviceCallback mMusicDeviceCallback;
-    private AudioRouting.OnRoutingChangedListener mRoutingChangedListener;
     private AudioDeviceInfo mRoutingDevice;
 
     /**
@@ -106,7 +104,7 @@ public class MusicRouterService extends Service {
                         mIsPlaying = true;
                         mIsStopped = false;
                         while (mIsPlaying) {
-                            //Log.d(TAG, "write() offset 0 size " + mBufferSize);
+                            Log.d(TAG, "write() offset 0 size " + mBufferSize);
                             mTrack.write(mBuffer, 0, mBufferSize);
                         }
                         stopMutedMusicThread();
@@ -206,9 +204,9 @@ public class MusicRouterService extends Service {
         if(mOutputDevices.get(type) != null) {
             mTrack.setPreferredDevice(mOutputDevices.get(type));
             AudioDeviceInfo info = mTrack.getRoutedDevice();
-            if(info == null || info.getType() != type) {
+            /*if(info == null || info.getType() != type) {
                 Toast.makeText(this, this.getString(R.string.msg_selected_device) + MusicRouterDevice.getDeviceNameByType(this, type), Toast.LENGTH_SHORT).show();
-            }
+            }*/
             mRoutingDevice = mOutputDevices.get(type);
             setPreferencesInt("routing_device_type", type);
         } else {
@@ -392,26 +390,7 @@ public class MusicRouterService extends Service {
 
         // 5. process when music is on playing
         processMutedMusicFirstTime();
-
-        // 6. register routingChangedListener
         mRoutingDevice = null;
-        mRoutingChangedListener = new AudioRouting.OnRoutingChangedListener() {
-            @Override
-            public void onRoutingChanged(AudioRouting router) {
-                if(DEBUG) Log.v(TAG, "onRoutingChanged()");
-                AudioDeviceInfo device = router.getRoutedDevice();
-                Message msg = new Message();
-                msg.arg1 = MSG_SET_PREFERRED_DEVICE;
-                if(mRoutingDevice == null) {
-                    msg.arg2 = MusicRouterDevice.TYPE_NULL;
-                    mHandler.sendMessageDelayed(msg, 10);
-                } else if(mTrack.getRoutedDevice() == null || mTrack.getRoutedDevice().getType() != mRoutingDevice.getType()) {
-                    msg.arg2 = mRoutingDevice.getType();
-                    mHandler.sendMessageDelayed(msg, 10);
-                }
-            }
-        };
-        mTrack.addOnRoutingChangedListener(mRoutingChangedListener, mHandler);
     }
 
     private void processMutedMusicFirstTime() {
