@@ -6,132 +6,140 @@
     android:layout_height="match_parent"
     tools:context=".RoutingActivity$PlaceholderFragment">
 
-    <LinearLayout
-        android:id="@+id/linear_layout"
+    <ScrollView
+        android:id="@+id/routing_activity_scroll_view"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:layout_height="match_parent"
+        android:fillViewport="true">
 
-        <TextView
-            android:id="@+id/text_service"
+        <LinearLayout
+            android:id="@+id/linear_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingHorizontal="@dimen/section_padding"
-            android:text="@string/title_service"
-            android:textColor="@color/colorBlueGreen"
-            android:textSize="@dimen/section_title"
-            android:textStyle="bold" />
+            android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/description_service"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:paddingHorizontal="10dp"
-            android:text="@string/description_service" />
+            <TextView
+                android:id="@+id/text_service"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingHorizontal="@dimen/section_padding"
+                android:text="@string/title_service"
+                android:textColor="@color/colorBlueGreen"
+                android:textSize="@dimen/section_title"
+                android:textStyle="bold" />
 
-        <Switch
-            android:id="@+id/switch_service"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:padding="13dp"
-            android:text="@string/switch_service" />
+            <TextView
+                android:id="@+id/description_service"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingHorizontal="10dp"
+                android:text="@string/description_service" />
 
-        <TextView
-            android:id="@+id/text_devices"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:paddingHorizontal="@dimen/section_padding"
-            android:text="@string/title_devices"
-            android:textColor="@color/colorBlueGreen"
-            android:textSize="@dimen/section_title"
-            android:textStyle="bold" />
+            <Switch
+                android:id="@+id/switch_service"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="13dp"
+                android:text="@string/switch_service" />
 
-        <TextView
-            android:id="@+id/description_service2"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:paddingHorizontal="10dp"
-            android:text="@string/description_devices" />
+            <TextView
+                android:id="@+id/text_devices"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingHorizontal="@dimen/section_padding"
+                android:text="@string/title_devices"
+                android:textColor="@color/colorBlueGreen"
+                android:textSize="@dimen/section_title"
+                android:textStyle="bold" />
 
-        <Switch
-            android:id="@+id/switch_speaker"
-            style="?android:attr/switchStyle"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:enabled="false"
-            android:padding="13dp"
-            android:text="@string/builtin_speaker" />
+            <TextView
+                android:id="@+id/description_service2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingHorizontal="10dp"
+                android:text="@string/description_devices" />
 
-        <Switch
-            android:id="@+id/switch_earpiece"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:enabled="false"
-            android:padding="13dp"
-            android:text="@string/builtin_earpiece" />
+            <Switch
+                android:id="@+id/switch_speaker"
+                style="?android:attr/switchStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:enabled="false"
+                android:padding="13dp"
+                android:text="@string/builtin_speaker" />
 
-        <Switch
-            android:id="@+id/switch_wired_headset"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:enabled="false"
-            android:padding="13dp"
-            android:text="@string/wired_headset" />
+            <Switch
+                android:id="@+id/switch_earpiece"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:enabled="false"
+                android:padding="13dp"
+                android:text="@string/builtin_earpiece" />
 
-        <Switch
-            android:id="@+id/switch_wired_headphones"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:enabled="false"
-            android:padding="13dp"
-            android:text="@string/wired_headphones" />
+            <Switch
+                android:id="@+id/switch_wired_headset"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:enabled="false"
+                android:padding="13dp"
+                android:text="@string/wired_headset" />
 
-        <Switch
-            android:id="@+id/switch_bluetooth_a2dp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:enabled="false"
-            android:padding="13dp"
-            android:text="@string/bluetooth_a2dp" />
+            <Switch
+                android:id="@+id/switch_wired_headphones"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:enabled="false"
+                android:padding="13dp"
+                android:text="@string/wired_headphones" />
 
-        <Switch
-            android:id="@+id/switch_hdmi"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:enabled="false"
-            android:padding="13dp"
-            android:text="@string/hdmi" />
+            <Switch
+                android:id="@+id/switch_bluetooth_a2dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:enabled="false"
+                android:padding="13dp"
+                android:text="@string/bluetooth_a2dp" />
 
-        <Switch
-            android:id="@+id/switch_usb_accessory"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:enabled="false"
-            android:padding="13dp"
-            android:text="@string/usb_accessory" />
+            <Switch
+                android:id="@+id/switch_hdmi"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:enabled="false"
+                android:padding="13dp"
+                android:text="@string/hdmi" />
 
-        <Switch
-            android:id="@+id/switch_usb_device"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:enabled="false"
-            android:padding="13dp"
-            android:text="@string/usb_device" />
+            <Switch
+                android:id="@+id/switch_usb_accessory"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:enabled="false"
+                android:padding="13dp"
+                android:text="@string/usb_accessory" />
 
-        <Switch
-            android:id="@+id/switch_usb_headset"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:enabled="false"
-            android:padding="13dp"
-            android:text="@string/usb_headset" />
+            <Switch
+                android:id="@+id/switch_usb_device"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:enabled="false"
+                android:padding="13dp"
+                android:text="@string/usb_device" />
 
-        <Switch
-            android:id="@+id/switch_aux_line"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:enabled="false"
-            android:padding="13dp"
-            android:text="@string/aux_line" />
-    </LinearLayout>
+            <Switch
+                android:id="@+id/switch_usb_headset"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:enabled="false"
+                android:padding="13dp"
+                android:text="@string/usb_headset" />
+
+            <Switch
+                android:id="@+id/switch_aux_line"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:enabled="false"
+                android:padding="13dp"
+                android:text="@string/aux_line" />
+        </LinearLayout>
+
+    </ScrollView>
 </android.support.constraint.ConstraintLayout>

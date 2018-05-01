@@ -22,7 +22,6 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:background="@color/colorBlack"
-            app:layout_scrollFlags="scroll|enterAlways"
             app:popupTheme="@style/AppTheme.PopupOverlay"
             app:title="@string/app_name">
 

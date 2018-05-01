@@ -7,6 +7,7 @@ import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.media.AudioDeviceInfo;
 import android.media.AudioManager;
+import android.os.Build;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
@@ -27,6 +28,8 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import android.widget.CompoundButton;
+import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.Switch;
 
 import java.util.HashMap;
@@ -373,6 +376,8 @@ public class RoutingActivity extends AppCompatActivity {
         }
 
         private void initializeDeviceList(View v) {
+            LinearLayout layout = v.findViewById(R.id.linear_layout);
+
             mSwitches = new HashMap<Integer, Switch>();
             Switch s = v.findViewById(R.id.switch_aux_line);
             s.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -493,23 +498,29 @@ public class RoutingActivity extends AppCompatActivity {
                 }
             });
             mSwitches.put(AudioDeviceInfo.TYPE_USB_DEVICE, s);
+            // USB headset visibility
             s = v.findViewById(R.id.switch_usb_headset);
-            s.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                @Override
-                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                    // USB Headset
-                    RoutingActivity a = (RoutingActivity) getActivity();
-                    if(!mWithoutRoutingChangeFlag) {
-                        if (isChecked && a != null && a.getService() != null) {
-                            a.getService().setPreferredDevice(AudioDeviceInfo.TYPE_USB_HEADSET);
-                            uncheckOtherSwitches((Switch) buttonView);
-                        } else if (!mDisableState && a != null && a.getService() != null) {
-                            a.getService().setPreferredDevice(-1);
+            if(Build.VERSION.SDK_INT < Build.VERSION_CODES.O_MR1) {
+                Log.i(TAG, "USB Headset type is not supported under 8.1");
+                layout.removeView(s);
+            } else {
+                s.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                    @Override
+                    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                        // USB Headset
+                        RoutingActivity a = (RoutingActivity) getActivity();
+                        if(!mWithoutRoutingChangeFlag) {
+                            if (isChecked && a != null && a.getService() != null) {
+                                a.getService().setPreferredDevice(AudioDeviceInfo.TYPE_USB_HEADSET);
+                                uncheckOtherSwitches((Switch) buttonView);
+                            } else if (!mDisableState && a != null && a.getService() != null) {
+                                a.getService().setPreferredDevice(-1);
+                            }
                         }
                     }
-                }
-            });
-            mSwitches.put(AudioDeviceInfo.TYPE_USB_HEADSET, s);
+                });
+                mSwitches.put(AudioDeviceInfo.TYPE_USB_HEADSET, s);
+            }
             s = v.findViewById(R.id.switch_wired_headphones);
             s.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override
