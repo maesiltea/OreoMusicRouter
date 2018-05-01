@@ -16,7 +16,18 @@
             android:id="@+id/text_service"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/title_service" />
+            android:paddingHorizontal="@dimen/section_padding"
+            android:text="@string/title_service"
+            android:textColor="@color/colorBlueGreen"
+            android:textSize="@dimen/section_title"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/description_service"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingHorizontal="10dp"
+            android:text="@string/description_service" />
 
         <Switch
             android:id="@+id/switch_service"
@@ -29,7 +40,18 @@
             android:id="@+id/text_devices"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/title_devices" />
+            android:paddingHorizontal="@dimen/section_padding"
+            android:text="@string/title_devices"
+            android:textColor="@color/colorBlueGreen"
+            android:textSize="@dimen/section_title"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/description_service2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingHorizontal="10dp"
+            android:text="@string/description_devices" />
 
         <Switch
             android:id="@+id/switch_speaker"

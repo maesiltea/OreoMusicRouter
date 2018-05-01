@@ -1,15 +1,17 @@
 <resources>
-    <string name="app_name">MusicRouter</string>
+    <string name="app_name">Music Router</string>
     <string name="action_settings">Settings</string>
     <string name="section_format">Hello World from section: %1$d</string>
 
     <string name="title_service">Service</string>
+    <string name="description_service">Enable service. If it\'s disabled, changing routing is not working. But if you disable this button, you can save the battery when you don\'t use music routing.</string>
     <string name="title_devices">Devices</string>
+    <string name="description_devices">Choose routing device you want. If the service switch is disabled, then it would not working.</string>
 
     <string name="msg_initialize_routing">Initialize routing device...</string>
     <string name="msg_selected_device">Selected Device: </string>
 
-    <string name="switch_service">Service On / Off</string>
+    <string name="switch_service">Service Enable / Disable</string>
 
     <string name="builtin_speaker">Builtin Speaker</string>
     <string name="wired_headset">Wired Headset</string>
@@ -27,4 +29,6 @@
     <string name="type_unknown">Unknwon Device</string>
     <string name="line_analog">Line Analog</string>
     <string name="line_digital">Line Digital</string>
+
+    <string name="settings_developer_name">Jinho Lee (pppljh@gmail.com)</string>
 </resources>

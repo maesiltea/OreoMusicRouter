@@ -196,19 +196,20 @@ public class RoutingActivity extends AppCompatActivity {
         mViewPager = findViewById(R.id.container);
         mViewPager.setAdapter(mSectionsPagerAdapter);
 
-        FloatingActionButton fab = findViewById(R.id.fab);
+        /*FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
             }
-        });
+        });*/
 
         mRoutingPage = null;
         mPlaybackState = MusicRouterDevice.STATE_STOP;
     }
 
+    /*
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -230,6 +231,7 @@ public class RoutingActivity extends AppCompatActivity {
 
         return super.onOptionsItemSelected(item);
     }
+    */
 
     /**
      * A placeholder fragment containing a simple view.

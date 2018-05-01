@@ -231,8 +231,20 @@ public class MusicRouterService extends Service {
     }
 
     public void setBackgroundPlayback(boolean enable) {
+        if(DEBUG) Log.d(TAG, "setBackgroundPlayback() enable " + enable + " mPlaybackState " + mPlaybackState);
+        Message msg = new Message();
+        if(enable && mPlaybackState) {
+            msg.arg1 = MSG_PLAY_MUSIC;
+            mHandler.sendMessage(msg);
+        }
+
         mBackgroundPlayback = enable;
         setPreferences("background_playback", enable ? "true" : "false");
+
+        if (!enable && mPlaybackState) {
+            msg.arg1 = MSG_STOP_MUSIC;
+            mHandler.sendMessage(msg);
+        }
     }
 
     public boolean getBackgroundPlayback() { return mBackgroundPlayback; }
@@ -307,30 +319,28 @@ public class MusicRouterService extends Service {
             public void onPlaybackConfigChanged(List<AudioPlaybackConfiguration> configs) {
                 super.onPlaybackConfigChanged(configs);
                 int configCount = 0;  // for filter myself
-                for(AudioPlaybackConfiguration config : configs) {
+                for (AudioPlaybackConfiguration config : configs) {
                     AudioAttributes attr = config.getAudioAttributes();
-                    if((attr.getContentType() == AudioAttributes.CONTENT_TYPE_MOVIE
+                    if ((attr.getContentType() == AudioAttributes.CONTENT_TYPE_MOVIE
                             || attr.getContentType() == AudioAttributes.CONTENT_TYPE_MUSIC)
                             && (attr.getUsage() == AudioAttributes.USAGE_MEDIA
                             || attr.getUsage() == AudioAttributes.USAGE_GAME)) {
-                        if(DEBUG) Log.d(TAG, "Music is being played");
+                        if (DEBUG) Log.d(TAG, "Music is being played");
                         configCount++;
                     }
                 }
 
                 // should consider mutedMusic state
-                if(mIsPlaying && configCount > 1) {
-                    mPlaybackState = true;
-                } else mPlaybackState = !mIsPlaying && configCount > 0;
-                if(DEBUG) Log.d(TAG, "onPlaybackConfigChanged() mPlaybackState " + mPlaybackState);
-                if(mMusicDeviceCallback != null) {
+                mPlaybackState = mIsPlaying && configCount > 1 || !mIsPlaying && configCount > 0;
+                if (DEBUG) Log.d(TAG, "onPlaybackConfigChanged() mPlaybackState " + mPlaybackState);
+                if (mMusicDeviceCallback != null) {
                     mMusicDeviceCallback.onMusicPlaybackStatusChanged(mPlaybackState
-                                                            ? MusicRouterDevice.STATE_PLAY
-                                                            : MusicRouterDevice.STATE_STOP);
+                            ? MusicRouterDevice.STATE_PLAY
+                            : MusicRouterDevice.STATE_STOP);
                 }
 
                 Message msg = new Message();
-                if(mPlaybackState) {
+                if (mPlaybackState) {
                     msg.arg1 = MSG_PLAY_MUSIC;
                     mHandler.sendMessage(msg);
                 } else {

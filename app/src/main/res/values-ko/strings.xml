@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Music Router</string>
+    <string name="action_settings">설정</string>
+    <string name="section_format">Hello World from section: %1$d</string>
+
+    <string name="title_service">서비스</string>
+    <string name="description_service">서비스를 활성화 합니다. 만약 이 설정을 끄면, 라우팅 변경이 적용되지 않습니다. 다만, 배터리 절약이 필요할 때에는 꺼두시는 게 좋습니다.</string>
+    <string name="title_devices">라우팅 장치 목록</string>
+    <string name="description_devices">음악 송출을 원하는 장치를 선택하세요. 상단 서비스 스위치가 꺼져있다면, 동작하지 않습니다.</string>
+
+    <string name="msg_initialize_routing">라우팅 장치 초기화...</string>
+    <string name="msg_selected_device">선택된 장치: </string>
+
+    <string name="switch_service">서비스 활성화 / 비활성화</string>
+
+    <string name="builtin_speaker">본체 스피커</string>
+    <string name="wired_headset">유선헤드셋(마이크 있음)</string>
+    <string name="wired_headphones">유선헤드폰(마이크 없음)</string>
+    <string name="aux_line">AUX 케이블</string>
+    <string name="bluetooth_a2dp">블루투스 A2DP(미디어)</string>
+    <string name="bluetooth_sco">블루투스 SCO(통화)</string>
+    <string name="builtin_earpiece">본체 수화기</string>
+    <string name="hdmi">HDMI</string>
+    <string name="dock">독(Dock)</string>
+    <string name="hdmi_arc">HDMI ARC</string>
+    <string name="usb_accessory">USB 액세서리</string>
+    <string name="usb_device">USB 장치</string>
+    <string name="usb_headset">USB 헤드셋(Android 8.1 에서 사용가능)</string>
+    <string name="type_unknown">알수 없는 장치</string>
+    <string name="line_analog">Line 아날로그</string>
+    <string name="line_digital">Line 디지털</string>
+</resources>
