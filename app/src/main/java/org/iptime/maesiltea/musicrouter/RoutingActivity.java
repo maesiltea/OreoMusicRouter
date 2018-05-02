@@ -93,7 +93,7 @@ public class RoutingActivity extends AppCompatActivity {
                         }
                     }
                     AudioDeviceInfo device = mService.getRoutedDevice();
-                    if(device != null) {
+                    if(device != null && mPlaybackState == MusicRouterDevice.STATE_PLAY) {
                         mRoutingPage.setSwitchChecked(device.getType(), true, false);
                     }
                 }
@@ -107,7 +107,7 @@ public class RoutingActivity extends AppCompatActivity {
                         }
                     }
                     AudioDeviceInfo device = mService.getRoutedDevice();
-                    if(device != null) {
+                    if(device != null && mPlaybackState == MusicRouterDevice.STATE_PLAY) {
                         mRoutingPage.setSwitchChecked(device.getType(), true, false);
                     }
                 }
@@ -118,10 +118,6 @@ public class RoutingActivity extends AppCompatActivity {
                     switch(status) {
                         case MusicRouterDevice.STATE_PLAY:
                             mPlaybackState = MusicRouterDevice.STATE_PLAY;
-                            AudioDeviceInfo device = mService.getRoutedDevice();
-                            //if(device != null) {
-                            //    mRoutingPage.setSwitchChecked(device.getType(), true, false);
-                            //}
                             break;
                         case MusicRouterDevice.STATE_STOP:
                             mPlaybackState = MusicRouterDevice.STATE_STOP;
@@ -569,8 +565,9 @@ public class RoutingActivity extends AppCompatActivity {
         }
 
         public void setSwitchEnabled(int key, boolean enabled) {
-            if(null != mSwitches) {
-                mSwitches.get(key).setEnabled(enabled);
+            Switch sw = mSwitches.get(key);
+            if(null != mSwitches && sw != null) {
+                sw.setEnabled(enabled);
             } else {
                 Log.w(TAG, "setSwitchEnabled() mSwitches is null");
             }

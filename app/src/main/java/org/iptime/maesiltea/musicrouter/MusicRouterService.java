@@ -115,14 +115,13 @@ public class MusicRouterService extends Service {
         } else {
             Log.i(TAG, "playMutedMusic() muted music still playing...");
         }
-
         // check whether the routing is initialized.
         if(mRoutingDevice != null) {
             if(DEBUG) Log.v(TAG, "playMutedMusic() change routing to " + mRoutingDevice.getType());
             Message msg = new Message();
             msg.arg1 = MSG_SET_PREFERRED_DEVICE;
             msg.arg2 = mRoutingDevice.getType();
-            mHandler.sendMessageDelayed(msg, 10);
+            mHandler.sendMessage(msg);
         }
     }
 
@@ -194,7 +193,7 @@ public class MusicRouterService extends Service {
             Log.w(TAG, "registerMusicDeviceCallback() callback is null");
         }
         mMusicDeviceCallback = callback;
-        if(mRoutingDevice != null) {
+        if(mRoutingDevice != null && mPlaybackState == true && mIsPlaying) {
             mMusicDeviceCallback.onFirstRoutingDevice(mRoutingDevice);
         }
     }
@@ -330,20 +329,22 @@ public class MusicRouterService extends Service {
 
                 // should consider mutedMusic state
                 mPlaybackState = mIsPlaying && configCount > 1 || !mIsPlaying && configCount > 0;
+
+                Message msg = new Message();
+                if (mPlaybackState) {
+                    msg.arg1 = MSG_PLAY_MUSIC;
+                    mHandler.removeMessages(MSG_STOP_MUSIC);
+                    mHandler.sendMessage(msg);
+                } else {
+                    msg.arg1 = MSG_STOP_MUSIC;
+                    mHandler.sendMessage(msg);
+                }
+
                 if (DEBUG) Log.d(TAG, "onPlaybackConfigChanged() mPlaybackState " + mPlaybackState);
                 if (mMusicDeviceCallback != null) {
                     mMusicDeviceCallback.onMusicPlaybackStatusChanged(mPlaybackState
                             ? MusicRouterDevice.STATE_PLAY
                             : MusicRouterDevice.STATE_STOP);
-                }
-
-                Message msg = new Message();
-                if (mPlaybackState) {
-                    msg.arg1 = MSG_PLAY_MUSIC;
-                    mHandler.sendMessage(msg);
-                } else {
-                    msg.arg1 = MSG_STOP_MUSIC;
-                    mHandler.sendMessage(msg);
                 }
             }
         };
