@@ -10,6 +10,7 @@
 
     <string name="msg_initialize_routing">Initialize routing device...</string>
     <string name="msg_selected_device">Selected Device: </string>
+    <string name="msg_plz_service_enable">Please enable service first</string>
 
     <string name="switch_service">Service Enable / Disable</string>
 

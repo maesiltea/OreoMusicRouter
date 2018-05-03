@@ -203,19 +203,26 @@ public class MusicRouterService extends Service {
         if(mOutputDevices.get(type) != null) {
             mTrack.setPreferredDevice(mOutputDevices.get(type));
             AudioDeviceInfo info = mTrack.getRoutedDevice();
-            /*if(info == null || info.getType() != type) {
-                Toast.makeText(this, this.getString(R.string.msg_selected_device) + MusicRouterDevice.getDeviceNameByType(this, type), Toast.LENGTH_SHORT).show();
-            }*/
+            if((info == null || info.getType() != type) && mBackgroundPlayback) {
+                Toast.makeText(this, this.getString(R.string.msg_selected_device)
+                        + MusicRouterDevice.getDeviceNameByType(this, type), Toast.LENGTH_SHORT)
+                        .show();
+            }
             mRoutingDevice = mOutputDevices.get(type);
             setPreferencesInt("routing_device_type", type);
         } else {
             AudioDeviceInfo info = mTrack.getPreferredDevice();
-            if(info != null) {
-                Toast.makeText(this, this.getString(R.string.msg_initialize_routing), Toast.LENGTH_SHORT).show();
+            if(info != null && mBackgroundPlayback) {
+                Toast.makeText(this, this.getString(R.string.msg_initialize_routing), Toast.LENGTH_SHORT)
+                        .show();
             }
             mTrack.setPreferredDevice(null);
             mRoutingDevice = null;
             setPreferencesInt("routing_device_type", MusicRouterDevice.TYPE_NULL);
+        }
+        if(!mBackgroundPlayback) {
+            Toast.makeText(this, this.getString(R.string.msg_plz_service_enable), Toast.LENGTH_SHORT)
+                    .show();
         }
     }
 
@@ -333,7 +340,6 @@ public class MusicRouterService extends Service {
                 Message msg = new Message();
                 if (mPlaybackState) {
                     msg.arg1 = MSG_PLAY_MUSIC;
-                    mHandler.removeMessages(MSG_STOP_MUSIC);
                     mHandler.sendMessage(msg);
                 } else {
                     msg.arg1 = MSG_STOP_MUSIC;
