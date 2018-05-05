@@ -29,11 +29,15 @@ import android.view.ViewGroup;
 
 import android.widget.CompoundButton;
 import android.widget.LinearLayout;
-import android.widget.ScrollView;
 import android.widget.Switch;
 
 import java.util.HashMap;
 import java.util.Objects;
+
+import com.google.android.gms.ads.MobileAds;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.AdListener;
 
 public class RoutingActivity extends AppCompatActivity {
 
@@ -246,6 +250,8 @@ public class RoutingActivity extends AppCompatActivity {
         private Switch mServiceSwitch;
         private Context mContext;
 
+        private AdView mAdView;  // AdMob
+
         /**
          *  Audio related implementations
          */
@@ -301,6 +307,7 @@ public class RoutingActivity extends AppCompatActivity {
                     initializeDeviceList(rootView);
                     initializeServiceSwitch(rootView);
                     initializeRoutingDevice(rootView);
+                    initializeAdMob(rootView);
                     break;
                 case 2:
                     rootView = inflater.inflate(R.layout.music_router_settings, container, false);
@@ -308,6 +315,48 @@ public class RoutingActivity extends AppCompatActivity {
             }
 
             return rootView;
+        }
+
+        private void initializeAdMob(View v) {
+            // AdMob
+            MobileAds.initialize(mContext, "");
+            mAdView = v.findViewById(R.id.adView);
+            AdRequest adRequest = new AdRequest.Builder()
+                    .build();
+            mAdView.loadAd(adRequest);
+            mAdView.setAdListener(new AdListener() {
+                @Override
+                public void onAdLoaded() {
+                    // Code to be executed when an ad finishes loading.
+                    Log.d(TAG, "onAdLoaded()");
+                }
+
+                @Override
+                public void onAdFailedToLoad(int errorCode) {
+                    // Code to be executed when an ad request fails.
+                    Log.w(TAG, "onAdFailedToLoad() errorCode " + errorCode);
+                }
+
+                @Override
+                public void onAdOpened() {
+                    // Code to be executed when an ad opens an overlay that
+                    // covers the screen.
+                    Log.d(TAG, "onAdOpened");
+                }
+
+                @Override
+                public void onAdLeftApplication() {
+                    // Code to be executed when the user has left the app.
+                    Log.d(TAG, "onAdLeftApplication()");
+                }
+
+                @Override
+                public void onAdClosed() {
+                    // Code to be executed when when the user is about to return
+                    // to the app after tapping on an ad.
+                    Log.d(TAG, "onAdClosed()");
+                }
+            });
         }
 
         private void initializeRoutingDevice(View v) {
