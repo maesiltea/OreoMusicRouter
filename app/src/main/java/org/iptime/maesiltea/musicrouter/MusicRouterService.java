@@ -104,7 +104,7 @@ public class MusicRouterService extends Service {
                         mIsPlaying = true;
                         mIsStopped = false;
                         while (mIsPlaying) {
-                            Log.d(TAG, "write() offset 0 size " + mBufferSize);
+                            //Log.d(TAG, "write() offset 0 size " + mBufferSize);
                             mTrack.write(mBuffer, 0, mBufferSize);
                         }
                         stopMutedMusicThread();
@@ -193,7 +193,7 @@ public class MusicRouterService extends Service {
             Log.w(TAG, "registerMusicDeviceCallback() callback is null");
         }
         mMusicDeviceCallback = callback;
-        if(mRoutingDevice != null && mPlaybackState == true && mIsPlaying) {
+        if(mRoutingDevice != null && mPlaybackState && mIsPlaying) {
             mMusicDeviceCallback.onFirstRoutingDevice(mRoutingDevice);
         }
     }
@@ -325,10 +325,11 @@ public class MusicRouterService extends Service {
                 int configCount = 0;  // for filter myself
                 for (AudioPlaybackConfiguration config : configs) {
                     AudioAttributes attr = config.getAudioAttributes();
-                    if ((attr.getContentType() == AudioAttributes.CONTENT_TYPE_MOVIE
-                            || attr.getContentType() == AudioAttributes.CONTENT_TYPE_MUSIC)
-                            && (attr.getUsage() == AudioAttributes.USAGE_MEDIA
-                            || attr.getUsage() == AudioAttributes.USAGE_GAME)) {
+                    if (attr.getUsage() == AudioAttributes.USAGE_MEDIA
+                            || attr.getUsage() == AudioAttributes.USAGE_GAME
+                            || attr.getUsage() == AudioAttributes.USAGE_ASSISTANCE_NAVIGATION_GUIDANCE
+                            || attr.getUsage() == AudioAttributes.USAGE_ASSISTANT
+                            || attr.getUsage() == AudioAttributes.USAGE_UNKNOWN) {
                         if (DEBUG) Log.d(TAG, "Music is being played");
                         configCount++;
                     }
