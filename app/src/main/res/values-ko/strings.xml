@@ -13,6 +13,12 @@
     <string name="msg_selected_device">선택된 장치: </string>
     <string name="msg_plz_service_enable">서비스를 먼저 활성화 해 주세요</string>
 
+    <!--Notification-->
+    <string name="notification_channel_description">뮤직 라우터 서비스가 실행 중임을 알리는 채널입니다.</string>
+    <string name="notification_channel_name">뮤직 라우터 서비스 채널</string>
+    <string name="notification_title">뮤직 라우터 서비스</string>
+    <string name="notification_content">뮤직 라우터 서비스가 실행 중입니다.</string>
+
     <string name="switch_service">서비스 활성화 / 비활성화</string>
 
     <string name="builtin_speaker">본체 스피커</string>

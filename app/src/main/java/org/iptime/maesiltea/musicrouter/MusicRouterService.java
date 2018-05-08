@@ -1,6 +1,8 @@
 package org.iptime.maesiltea.musicrouter;
 
 import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -18,6 +20,7 @@ import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
+import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.util.SparseArray;
 import android.widget.Toast;
@@ -47,6 +50,9 @@ public class MusicRouterService extends Service {
      *  Foreground related implementations
      */
     private final int SERVICE_NOTIFICATION_ID = 1;
+    private final String SERVICE_CHANNEL_NAME = "MusicRouterService";
+    private final String SERVICE_CHANNEL_ID = "MusicRouter";
+    private NotificationManager mNotificationManager;
 
     /**
      *  Music playback related implementations
@@ -244,6 +250,15 @@ public class MusicRouterService extends Service {
 
         mBackgroundPlayback = enable;
         setPreferences("background_playback", enable ? "true" : "false");
+        if(enable) {
+            initializeNotification();
+            Notification notification = makeNotification(this
+                    , getString(R.string.notification_title)
+                    , getString(R.string.notification_content));
+            mNotificationManager.notify(SERVICE_NOTIFICATION_ID, notification);
+        } else {
+            mNotificationManager.deleteNotificationChannel(SERVICE_CHANNEL_ID);
+        }
 
         if (!enable && mPlaybackState) {
             msg.arg1 = MSG_STOP_MUSIC;
@@ -286,13 +301,31 @@ public class MusicRouterService extends Service {
         if(DEBUG) Log.v(TAG, "onStartCommand()");
 
         super.onStartCommand(intent, flags, startId);
-        Notification notification = new Notification.Builder(this)
-                .setSmallIcon(android.R.drawable.alert_dark_frame)
-                .setContentTitle("MusicRouterService")
-                .setContentText("MusicRouter service is running...")
-                .build();
+        Notification notification = makeNotification(this
+                , getString(R.string.notification_title)
+                , getString(R.string.notification_content));
         startForeground(SERVICE_NOTIFICATION_ID, notification);
+        if(!mBackgroundPlayback) mNotificationManager.deleteNotificationChannel(SERVICE_CHANNEL_ID);
         return START_STICKY;
+    }
+
+    private void initializeNotification() {
+        mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        NotificationChannel channel = new NotificationChannel(SERVICE_CHANNEL_ID
+                , SERVICE_CHANNEL_NAME
+                , NotificationManager.IMPORTANCE_DEFAULT);
+        channel.setDescription(getString(R.string.notification_channel_description));
+        channel.setName(getString(R.string.notification_channel_name));
+        channel.enableVibration(false);
+        mNotificationManager.createNotificationChannel(channel);
+    }
+
+    private Notification makeNotification(Context ctx, String title, String text) {
+        return new NotificationCompat.Builder(ctx, SERVICE_CHANNEL_ID)
+                .setSmallIcon(android.R.drawable.stat_sys_headset)
+                .setContentTitle(title)
+                .setContentText(text)
+                .build();
     }
 
     @Override
@@ -300,12 +333,12 @@ public class MusicRouterService extends Service {
         if(DEBUG) Log.w(TAG, "onCreate");
 
         // 0. set this service to foreground. (this service should not be killed.)
-        Notification notification = new Notification.Builder(this)
-                .setSmallIcon(android.R.drawable.alert_dark_frame)
-                .setContentTitle("MusicRouterService")
-                .setContentText("MusicRouter service is running...")
-                .build();
+        initializeNotification();
+        Notification notification = makeNotification(this
+                , getString(R.string.notification_title)
+                , getString(R.string.notification_content));
         startForeground(SERVICE_NOTIFICATION_ID, notification);
+        if(!mBackgroundPlayback) mNotificationManager.deleteNotificationChannel(SERVICE_CHANNEL_ID);
 
         // 1. register handler thread
         HandlerThread thread = new HandlerThread("MusicRouterSerivceHandler");

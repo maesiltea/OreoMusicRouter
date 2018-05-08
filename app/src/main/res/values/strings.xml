@@ -12,6 +12,12 @@
     <string name="msg_selected_device">Selected Device: </string>
     <string name="msg_plz_service_enable">Please enable service first</string>
 
+    <!--Notification-->
+    <string name="notification_channel_description">Notify channel for MusicRouter service is running.</string>
+    <string name="notification_channel_name">MusicRouter Service channel</string>
+    <string name="notification_title">MusicRouter Service</string>
+    <string name="notification_content">MusicRouter service is running...</string>
+
     <string name="switch_service">Service Enable / Disable</string>
 
     <string name="builtin_speaker">Builtin Speaker</string>
