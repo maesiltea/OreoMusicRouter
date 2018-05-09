@@ -86,6 +86,9 @@ public class RoutingActivity extends AppCompatActivity {
             mService = binder.getService();
             mBound = true;
 
+            // set last device
+            mService.setPreferredDevice(getPreferencesInt("routing_device_type", -1));
+
             // Implements callback
             mMusicRouterDeviceCallback = new MusicRouterDeviceCallback() {
                 @Override
@@ -128,14 +131,6 @@ public class RoutingActivity extends AppCompatActivity {
                             break;
                     }
                 }
-
-                @Override
-                public void onFirstRoutingDevice(AudioDeviceInfo deviceInfo) {
-                    if(DEBUG) Log.d(TAG, "onFirstRoutingDevice()");
-                    if(mRoutingPage != null) {
-                        mRoutingPage.setSwitchEnabled(deviceInfo.getType(), true);
-                    }
-                }
             };
             mService.registerMusicDeviceCallback(mMusicRouterDeviceCallback);
         }
@@ -146,19 +141,6 @@ public class RoutingActivity extends AppCompatActivity {
             mBound = false;
         }
     };
-
-    /*
-    @Override
-    protected void onStart() {
-        Log.d(TAG, "onStart()");
-        super.onStart();
-    }
-
-    @Override
-    protected void onStop() {
-        Log.d(TAG, "onStop");
-        super.onStop();
-    }*/
 
     @Override
     protected  void onDestroy() {
@@ -173,6 +155,16 @@ public class RoutingActivity extends AppCompatActivity {
 
     public void setRoutingPage(PlaceholderFragment pf) {
         mRoutingPage = pf;
+    }
+
+    public String getPreferences(String name, String defVal) {
+        SharedPreferences pf = mContext.getSharedPreferences("routing_activity", MODE_PRIVATE);
+        return pf.getString(name, defVal);
+    }
+
+    public int getPreferencesInt(String name, int defVal) {
+        SharedPreferences pf = mContext.getSharedPreferences("routing_activity", MODE_PRIVATE);
+        return pf.getInt(name, defVal);
     }
 
     @Override
@@ -308,6 +300,9 @@ public class RoutingActivity extends AppCompatActivity {
                     initializeServiceSwitch(rootView);
                     initializeRoutingDevice(rootView);
                     initializeAdMob(rootView);
+                    setSwitchChecked(getPreferencesInt("routing_device_type", -1)
+                            , true
+                            , true);
                     break;
                 case 2:
                     rootView = inflater.inflate(R.layout.music_router_settings, container, false);

@@ -199,9 +199,6 @@ public class MusicRouterService extends Service {
             Log.w(TAG, "registerMusicDeviceCallback() callback is null");
         }
         mMusicDeviceCallback = callback;
-        if(mRoutingDevice != null && mPlaybackState && mIsPlaying) {
-            mMusicDeviceCallback.onFirstRoutingDevice(mRoutingDevice);
-        }
     }
 
     public void setPreferredDevice(int type) {
@@ -299,13 +296,7 @@ public class MusicRouterService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         if(DEBUG) Log.v(TAG, "onStartCommand()");
-
         super.onStartCommand(intent, flags, startId);
-        Notification notification = makeNotification(this
-                , getString(R.string.notification_title)
-                , getString(R.string.notification_content));
-        startForeground(SERVICE_NOTIFICATION_ID, notification);
-        if(!mBackgroundPlayback) mNotificationManager.deleteNotificationChannel(SERVICE_CHANNEL_ID);
         return START_STICKY;
     }
 
@@ -338,7 +329,7 @@ public class MusicRouterService extends Service {
                 , getString(R.string.notification_title)
                 , getString(R.string.notification_content));
         startForeground(SERVICE_NOTIFICATION_ID, notification);
-        if(!mBackgroundPlayback) mNotificationManager.deleteNotificationChannel(SERVICE_CHANNEL_ID);
+        mNotificationManager.deleteNotificationChannel(SERVICE_CHANNEL_ID);
 
         // 1. register handler thread
         HandlerThread thread = new HandlerThread("MusicRouterSerivceHandler");
@@ -348,7 +339,7 @@ public class MusicRouterService extends Service {
         mHandler = new ServiceHandler(mLooper);
 
         // 2. initialize variables
-        mBackgroundPlayback = "true".equals(getPreferences("background_playback", "false"));
+        setBackgroundPlayback("true".equals(getPreferences("background_playback", "false")));
         mPlaybackState = false;
         mManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         mPlaybackCallback = new AudioManager.AudioPlaybackCallback() {
