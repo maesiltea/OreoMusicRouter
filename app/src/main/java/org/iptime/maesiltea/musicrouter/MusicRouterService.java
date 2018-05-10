@@ -389,6 +389,9 @@ public class MusicRouterService extends Service {
                         mOutputDevices.put(device.getType(), device);
                     }
                 }
+
+                updateOutputDevices();
+
                 // Notify to client(Activity)
                 if(mMusicDeviceCallback != null) {
                     mMusicDeviceCallback.onDeviceAdded(addedDevices);
@@ -404,6 +407,9 @@ public class MusicRouterService extends Service {
                         mOutputDevices.delete(device.getType());
                     }
                 }
+
+                updateOutputDevices();
+
                 // Notify to client (Activity)
                 if(mMusicDeviceCallback != null) {
                     mMusicDeviceCallback.onDeviceDeleted(removedDevices);
