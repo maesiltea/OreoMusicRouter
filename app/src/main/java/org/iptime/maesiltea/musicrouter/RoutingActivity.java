@@ -65,7 +65,7 @@ public class RoutingActivity extends AppCompatActivity {
     /**
      *  Audio related variables
      */
-    private MusicRouterDeviceCallback mMusicRouterDeviceCallback;
+    protected MusicRouterDeviceCallback mMusicRouterDeviceCallback;
     private int mPlaybackState;
 
     /**
@@ -138,7 +138,8 @@ public class RoutingActivity extends AppCompatActivity {
         @Override
         public void onServiceDisconnected(ComponentName name) {
             Log.w(TAG, "onServiceDisconnected");
-            mBound = false;
+            setBound(false);
+            mService = null;
         }
     };
 
@@ -146,11 +147,6 @@ public class RoutingActivity extends AppCompatActivity {
     protected  void onDestroy() {
         Log.d(TAG, "onDestroy()");
         super.onDestroy();
-        // Unbind from MusicRouterService (local service)
-        /*if(mBound) {
-            unbindService(mConnection);
-            mBound = false;
-        }*/
     }
 
     public void setRoutingPage(PlaceholderFragment pf) {
@@ -167,19 +163,35 @@ public class RoutingActivity extends AppCompatActivity {
         return pf.getInt(name, defVal);
     }
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if(DEBUG) Log.w(TAG, "onCreate() mBound " + mBound);
-        setContentView(R.layout.activity_routing);
-        mContext = this;
-
-        if (!mBound) {
-            if (DEBUG) Log.d(TAG, "onCreate() start Service...");
+    private void refreshService() {
+        if (!getBound()) {
+            if (DEBUG) Log.d(TAG, "refreshService() start Service...");
             Intent intent = new Intent(this, MusicRouterService.class);
             startService(intent);
             bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
         }
+    }
+
+    @Override
+    protected void onStart() {
+        if(DEBUG) Log.v(TAG, "onStart()");
+        super.onStart();
+        refreshService();
+    }
+
+    @Override
+    protected void onResume() {
+        if(DEBUG) Log.v(TAG, "onResume()");
+        super.onStart();
+        refreshService();
+    }
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        Log.v(TAG, "onCreate() mBound " + mBound);
+        setContentView(R.layout.activity_routing);
+        mContext = this;
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -200,8 +212,11 @@ public class RoutingActivity extends AppCompatActivity {
             }
         });*/
 
+        // initialize default variables
         mRoutingPage = null;
         mPlaybackState = MusicRouterDevice.STATE_STOP;
+        mMusicRouterDeviceCallback = null;
+        refreshService();
     }
 
     /*
