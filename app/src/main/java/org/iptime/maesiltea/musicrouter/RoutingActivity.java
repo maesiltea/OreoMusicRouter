@@ -94,6 +94,10 @@ public class RoutingActivity extends AppCompatActivity {
                 @Override
                 public void onDeviceAdded(AudioDeviceInfo[] addedDevices) {
                     if(DEBUG) Log.v(TAG, "onDeviceAdded()");
+                    if(mRoutingPage == null) {
+                        Log.w(TAG, "mRouingPage is null");
+                        return;
+                    }
                     for(AudioDeviceInfo info : addedDevices) {
                         if(info.isSink()) {
                             mRoutingPage.setSwitchEnabled(info.getType(), true);
@@ -103,11 +107,16 @@ public class RoutingActivity extends AppCompatActivity {
                     if(device != null && mPlaybackState == MusicRouterDevice.STATE_PLAY) {
                         mRoutingPage.setSwitchChecked(device.getType(), true, false);
                     }
+                    mRoutingPage.updateSwitchEnabledState();
                 }
 
                 @Override
                 public void onDeviceDeleted(AudioDeviceInfo[] removedDevices) {
                     if(DEBUG) Log.d(TAG, "onDeviceDeleted()");
+                    if(mRoutingPage == null) {
+                        Log.w(TAG, "mRouingPage is null");
+                        return;
+                    }
                     for(AudioDeviceInfo info : removedDevices) {
                         if(info.isSink()) {
                             mRoutingPage.setSwitchEnabled(info.getType(), false);
@@ -117,6 +126,7 @@ public class RoutingActivity extends AppCompatActivity {
                     if(device != null && mPlaybackState == MusicRouterDevice.STATE_PLAY) {
                         mRoutingPage.setSwitchChecked(device.getType(), true, false);
                     }
+                    mRoutingPage.updateSwitchEnabledState();
                 }
 
                 @Override
